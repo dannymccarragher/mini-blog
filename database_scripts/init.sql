@@ -5,5 +5,6 @@ id INT auto_increment,
 author varchar(255),
 title varchar(510),
 
+
 PRIMARY KEY(id)
 )

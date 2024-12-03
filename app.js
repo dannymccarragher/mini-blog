@@ -79,7 +79,7 @@ app.post('/submit', async (req, res) => {
 
 app.get('/entries', async (req, res) => {
     const conn = await connect();
-    const posts = await conn.query('SELECT * FROM blog_posts');
+    const posts = await conn.query('SELECT * FROM blog_posts ORDER BY created_at DESC');
     res.render('entries', { posts });
 });
 
