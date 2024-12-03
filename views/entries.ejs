@@ -14,7 +14,14 @@
                <h3> <%= posts[i].title %> </h3>
                 
             <p><%= posts[i].content %></p>
-            <p> Author: <%= posts[i].author %> </p>
+            <p>Author:
+                <!-- Say no author instead of null   -->
+                <% if (!posts.author) { %>
+                    No author
+                <% } else { %>
+                    <%= posts.author %>
+                <% } %>
+            </p>
             
             
     </div>

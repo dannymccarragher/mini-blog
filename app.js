@@ -21,23 +21,21 @@ async function connect() {
         console.log('Connected to the database');
         return conn;
     } catch (err) {
-        console.log('Error connecting to the database: ' + err)
+        console.log('Error connecting to the database: ' + err);
     }
 }
 
-
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 
 app.use(express.static('public'));
 
-app.set('view engine' , 'ejs');
+app.set('view engine', 'ejs');
 
-
-app.get('/', (req,res) => {
-    res.render('home');
+app.get('/', (req, res) => {
+    res.render('home', { errors: {} });
 });
 
-app.post('/submit', async (req,res) =>{
+app.post('/submit', async (req, res) => {
     const newPost = {
         author: req.body.author,
         title: req.body.title,
@@ -45,40 +43,46 @@ app.post('/submit', async (req,res) =>{
     }
 
     let isValid = true;
-    let errors = [];
+    //use object instead of array for direct field association
+    let errors = { author: null, title: null, content: null };
 
-    if (newPost.author.trim() === ""){
-        isValid = false;
-        errors.push("Author is required")
+    if (newPost.author.trim() === "") {
+        newPost.author = null;
     }
 
-    if (data.title.trim() === ""){
+    if (newPost.title.trim() === "") {
         isValid = false;
-        errors.push("Title is required")
+        errors.title = "Title is required.";
+    } else if (newPost.title.trim().length <= 5) {
+        isValid = false;
+        errors.title = "Title must contain more than 5 characters."; 
     }
 
-    if (data.content.trim() === ""){
+    if (newPost.content.trim() === "") {
         isValid = false;
-        errors.push("Content is required")
+        errors.content = "Content is required.";
     }
 
-    if (!isValid){
-        res.render('home', {newPost: newPost, errors : errors});
+    if (!isValid) {
+        res.render('home', { newPost: newPost, errors: errors });
         return;
     }
+
     const conn = await connect();
-    conn.query(`
-        INSERT INTO posts (author, title, content)
+    await conn.query(`
+        INSERT INTO blog_posts (author, title, content)
         VALUES ('${newPost.author}', '${newPost.title}', '${newPost.content}');
     `);
 
-    res.render('confirmation', { posts : newPost});
+    res.render('confirmation', { posts: newPost });
 });
 
-app.get('/entries', (req, res)=> {
-    res.render('entries', {posts : posts})
+app.get('/entries', async (req, res) => {
+    const conn = await connect();
+    const posts = await conn.query('SELECT * FROM blog_posts');
+    res.render('entries', { posts });
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`)
+    console.log(`Server running on http://localhost:${PORT}`);
 });
