@@ -32,7 +32,12 @@ app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
-    res.render('home', { errors: {} });
+    const newPost = {
+        author: req.body.author,
+        title: req.body.title,
+        content: req.body.content
+    }
+    res.render('home', { errors: {}, newPost });
 });
 
 app.post('/submit', async (req, res) => {
